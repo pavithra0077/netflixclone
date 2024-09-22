@@ -1,20 +1,51 @@
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Run application",
-      "type": "node",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run-script",
-        "start"
-      ],
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+import React, { useState } from 'react';
+
+const App = () => {
+  const [input, setInput] = useState('');
+  const [response, setResponse] = useState(null);
+  const [dropdownValue, setDropdownValue] = useState([]);
+
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/bfhl', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data: JSON.parse(input) })
+      });
+      const data = await res.json();
+      setResponse(data);
+    } catch (error) {
+      console.error('Error:', error);
     }
-  ]
-}
+  };
+
+  return (
+    <div>
+      <h1>{'your_roll_number'}</h1>
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder='Enter JSON data here'
+      />
+      <button onClick={handleSubmit}>Submit</button>
+      {response && (
+        <>
+          <select onChange={(e) => setDropdownValue(e.target.value)}>
+            <option value="numbers">Numbers</option>
+            <option value="alphabets">Alphabets</option>
+            <option value="highestLowercase">Highest Lowercase Alphabet</option>
+          </select>
+          <div>
+            {dropdownValue === 'numbers' && <p>{response.numbers.join(', ')}</p>}
+            {dropdownValue === 'alphabets' && <p>{response.alphabets.join(', ')}</p>}
+            {dropdownValue === 'highestLowercase' && <p>{response.highest_lowercase_alphabet.join(', ')}</p>}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default App;
